@@ -114,7 +114,6 @@ void EstimateLengthManager::printPerSectionBreakdown() const {
 
 ////////////////////// Group and Optimize Sections //////////////////////////
 
-
 EstimateLengthResult EstimateLengthManager::groupAndOptimizeSections() {
     EstimateLengthResult result;
     std::unordered_map<std::string, std::vector<LengthGroup>> groupedResults;
@@ -149,11 +148,11 @@ EstimateLengthResult EstimateLengthManager::groupAndOptimizeSections() {
 
             for (float length : allowedLengths) {
                 std::vector<int> currentIndices;
-               double sum = 0.0f;
+                double sum = 0.0f;
 
                 for (size_t i = 0; i < pieces.size(); ++i) {
                     if (used[i]) continue;
-                   double pieceLength = pieces[i].second;
+                    double pieceLength = pieces[i].second;
 
                     if (sum + pieceLength <= length) {
                         currentIndices.push_back(i);
@@ -162,7 +161,7 @@ EstimateLengthResult EstimateLengthManager::groupAndOptimizeSections() {
                     }
                 }
 
-               double currentWastage = length - sum;
+                double currentWastage = length - sum;
 
                 if (!currentIndices.empty() && currentWastage <= 1.75f && currentWastage < bestWastage) {
                     bestWastage = currentWastage;
@@ -173,7 +172,7 @@ EstimateLengthResult EstimateLengthManager::groupAndOptimizeSections() {
 
             if (bestIndices.empty()) break;
 
-           double total = 0.0f;
+            double total = 0.0f;
             std::vector<std::string> labelDetails;
             for (int idx : bestIndices) {
                 used[idx] = true;
@@ -190,7 +189,7 @@ EstimateLengthResult EstimateLengthManager::groupAndOptimizeSections() {
             if (!used[i]) leftovers.push_back(pieces[i]);
         }
 
-       double leftoverSum = 0.0f;
+        double leftoverSum = 0.0f;
         std::vector<std::string> leftoverLabels;
         for (const auto& [label, len] : leftovers) {
             leftoverSum += len;
@@ -230,7 +229,11 @@ EstimateLengthResult EstimateLengthManager::groupAndOptimizeSections() {
                 size_t pos1 = lbl.find("(");
                 size_t pos2 = lbl.find(")");
                 if (pos1 != std::string::npos && pos2 != std::string::npos) {
-                    usedLength += std::stof(lbl.substr(pos1 + 1, pos2 - pos1 - 1));
+                    try {
+                        usedLength += std::stof(lbl.substr(pos1 + 1, pos2 - pos1 - 1));
+                    } catch (const std::exception& e) {
+                        std::cerr << "⚠️ Error parsing number in label '" << lbl << "': " << e.what() << "\n";
+                    }
                 }
                 joined += lbl + " + ";
             }
@@ -290,6 +293,7 @@ const std::vector<SectionSummary>& EstimateLengthManager::getSummaries() const {
 std::vector<SectionSummary>& EstimateLengthManager::getSummaries() {
     return sectionSummaries;
 }
+
 
 
 
